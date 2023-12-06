@@ -1,0 +1,143 @@
+1)
+
+class MoviesController < ApplicationController
+  before_action :set_movie, only: [:show, :edit, :update, :destroy]
+
+  def show
+    if @movie.nil?
+      flash[:alert] = "La película no existe."      //Acá marcamos una alerta que nos diga que la película no existe en nuestra BD
+      redirect_to movies_path
+    end
+  end
+
+ #Codigo ..........
+
+  private
+
+  def set_movie
+    @movie = Movie.find_by(id: params[:id])
+  end
+end
+ 
+
+ #Codigo ..........
+
+2) Reusabilidad:
+
+Reusabilidad:
+
+Al encapsular la lógica en un método separado, puedes reutilizar fácilmente esa funcionalidad en otros lugares del código si es necesario. Si la lógica se requiere en múltiples partes de la aplicación, tener un método dedicado facilita su reutilización sin tener que duplicar el código.
+
+Facilitar Pruebas Unitarias:
+
+Al tener la lógica en un método separado, es más fácil escribir pruebas unitarias específicas para ese método. Puedes simular el entorno de OmniAuth y probar cómo tu aplicación maneja diferentes escenarios sin depender directamente de la implementación interna de request.env['omniauth.auth'].
+
+3)
+html: 
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lista de Películas</title>
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  <script src="path/to/your/script.js"></script>
+</head>
+<body>
+  <h1>Lista de Películas</h1>
+  <div id="movies-list">
+    <div class="movie G">Película G</div>
+    <div class="movie PG">Película PG</div>
+    <div class="movie PG-13">Película PG-13</div>
+    <!-- ... más elementos de película ... -->
+  </div>
+  <div>
+    <label><input type="checkbox" value="G" checked> G</label>
+    <label><input type="checkbox" value="PG" checked> PG</label>
+    <label><input type="checkbox" value="PG-13" checked> PG-13</label>
+    <!-- ... más casillas de verificación ... -->
+  </div>
+</body>
+</html>
+
+javascript
+
+$(document).ready(function() {
+  // Marcamos todas las casillas de verificación al cargar la página
+  $('input[type="checkbox"]').prop('checked', true);
+
+  // Asignamos un controlador de eventos a las casillas de verificación
+  $('input[type="checkbox"]').change(function() {
+    const rating = $(this).val();
+
+    // Mostramos u ocultamos las películas según el estado de la casilla
+    if ($(this).prop('checked')) {
+      // Mostramos las películas con la calificación correspondiente
+      $(`.movie.${rating}`).show();
+    } else {
+      // Ocultamos las películas con la calificación correspondiente
+      $(`.movie.${rating}`).hide();
+    }
+  });
+});
+
+
+
+4)
+
+# En tu archivo step_definitions/movie_steps.rb
+
+Given(/^the movie "(.*?)" exists$/) do |movie_title|
+  # Lógica para crear la película con el título proporcionado
+  Movie.create(title: movie_title)
+end
+
+Given(/^it has (\d+) reviews$/) do |review_count|
+  # Lógica para agregar la cantidad de reseñas especificada a la película
+  movie = Movie.find_by(title: @current_movie_title)
+  review_count.to_i.times { movie.reviews.create }
+end
+
+Given(/^its average review score is (\d+\.\d+)$/) do |average_score|
+  # Lógica para establecer la puntuación promedio de la película
+  movie = Movie.find_by(title: @current_movie_title)
+  movie.update(average_score: average_score.to_f)
+end
+
+When(/^the user views the details of the movie "(.*?)"$/) do |movie_title|
+  # Lógica para que el usuario vea los detalles de la película
+  @current_movie_title = movie_title
+  visit movie_path(Movie.find_by(title: movie_title))
+end
+
+Then(/^they should see the movie details including:$/) do |table|
+  # Lógica para verificar que se muestren los detalles de la película según la tabla
+  movie = Movie.find_by(title: @current_movie_title)
+  table.hashes.each do |row|
+    expect(page).to have_content("#{row['Attribute']}: #{row['Value']}")
+  end
+end
+
+
+
+
+
+7) 
+La clase F1 responde a los siguiente métodos:
+
+be_a_pain_in_the_butt
+
+Este método devolverá un valor que se evalúe como verdadero en el contexto de un valor esperado.
+
+be_awesome
+
+Este método devolverá un valor que se evalúe como verdadero en el contexto de otro valor esperado. 
+
+be_nil
+
+Este método devolverá un valor que se evalúe como falso en el contexto de un valor esperado. Se puede implementar este método para que devuelva nil o cualquier otro valor que se evalúe como falso.
+
+== con "" (cadena vacía)
+
+Este método devolverá un valor que se evalúe como falso en el contexto de una expectativa. Puedes implementar este método para que devuelva cualquier valor que no sea una cadena vacía.
